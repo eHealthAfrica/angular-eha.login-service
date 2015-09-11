@@ -4,6 +4,7 @@
   "description": "Login service to handle auth and auth renewal",
   "main": "dist/login-service.js",
   "scripts": {
+    "pretest": "standard",
     "test": "grunt test"
   },
   "author": "Remy Sharp <remy@remysharp.com>",
@@ -23,9 +24,7 @@
     "grunt-contrib-concat": "^0.5.1",
     "grunt-contrib-copy": "^0.7.0",
     "grunt-contrib-uglify": "^0.8.0",
-    "grunt-contrib-jshint": "^0.11.0",
     "grunt-contrib-watch": "^0.6.1",
-    "grunt-jscs": "^1.5.0",
     "grunt-html2js": "^0.3.0",
     "grunt-karma": "^0.10.1",
     "grunt-ng-annotate": "^0.10.0",
@@ -43,6 +42,15 @@
     "mocha": "^2.1.0",
     "optimist": "^0.6.1",
     "sinon": "^1.12.2",
+    "standard": "^5.2.2",
     "wiredep": "^2.2.2"
+  },
+  "standard": {
+    "globals": [
+      "angular"
+    ],
+    "ignore": [
+      "dist"
+    ]
   }
 }

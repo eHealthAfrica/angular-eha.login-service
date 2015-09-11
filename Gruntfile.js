@@ -1,6 +1,5 @@
-module.exports = function(grunt) {
-
-  require('load-grunt-tasks')(grunt);
+module.exports = function (grunt) {
+  require('load-grunt-tasks')(grunt)
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -25,8 +24,8 @@ module.exports = function(grunt) {
           'scripts.template.js'
         ],
         dest: 'dist/',
-        rename: function(dest, src) {
-          return dest + src.replace('scripts','login-service');
+        rename: function (dest, src) {
+          return dest + src.replace('scripts', 'login-service')
         }
       }
     },
@@ -38,13 +37,13 @@ module.exports = function(grunt) {
         ],
         dest: '.tmp/scripts.js',
         options: {
-          process: function(src, path) {
+          process: function (src, path) {
             // Remove templates dependency from non-templates version if exists
-            return src.replace(/,\n    'eha.login\.login-service\.template'/, '');
+            return src.replace(/,\n {4}'eha.login\.login-service\.template'/, '')
           }
         }
       },
-      scriptsWithTemplateDeps:{
+      scriptsWithTemplateDeps: {
         src: [
           'src/**/*.js',
           '!src/**/*.spec.js'
@@ -84,11 +83,11 @@ module.exports = function(grunt) {
         dest: '.tmp/template.js',
         module: 'eha.login-service.template',
         options: {
-          rename: function(moduleName) {
-            var parts = moduleName.split('/');
-            var index = parts.indexOf('src');
-            parts = parts.slice(index + 1, parts.length);
-            return 'templates/' + parts.join('/');
+          rename: function (moduleName) {
+            var parts = moduleName.split('/')
+            var index = parts.indexOf('src')
+            parts = parts.slice(index + 1, parts.length)
+            return 'templates/' + parts.join('/')
           }
         }
       }
@@ -123,43 +122,31 @@ module.exports = function(grunt) {
         prereleaseName: false,
         regExp: false
       }
-    },
-    jshint: {
-      all: ['src/**/*.js', 'tests/**/*.spec.js']
-    },
-    jscs: {
-      src: ['src/**/*.js', 'tests/**/*.spec.js'],
-      options: {
-        config: ".jscsrc",
-        requireCurlyBraces: [ "if" ]
-      }
     }
-  });
+  })
 
-  grunt.registerTask('template', ['html2js']);
-  grunt.registerTask('test', ['template', 'jshint', 'jscs', 'karma:unit']);
-  grunt.registerTask('test:watch', ['karma:watch']);
+  grunt.registerTask('template', ['html2js'])
+  grunt.registerTask('test', ['template', 'karma:unit'])
+  grunt.registerTask('test:watch', ['karma:watch'])
 
-  grunt.registerTask('build', function() {
+  grunt.registerTask('build', function () {
     grunt.task.run([
       'clean',
 
       'concat:scripts',
 
-
       'ngAnnotate',
       'copy:scripts',
       'uglify:dist'
-    ]);
-  });
+    ])
+  })
 
-  grunt.registerTask('release', function(target) {
+  grunt.registerTask('release', function (target) {
     grunt.task.run([
       'build',
       'bump:' + target
     ])
-  });
+  })
 
-  grunt.registerTask('default', ['jshint', 'jscs', 'build']);
-
-};
+  grunt.registerTask('default', ['build'])
+}
