@@ -1,6 +1,9 @@
 # angular-eha.login-service
 
-[![Build Status](https://travis-ci.org/eHealthAfrica/login-service.svg)](https://travis-ci.org/eHealthAfrica/login-service) ![Dependecy Status](https://david-dm.org/eHealthAfrica/login-service.svg) ![Dev Dependecy Status](https://david-dm.org/eHealthAfrica/login-service/dev-status.svg)
+[![Build Status][travis-image]][travis-url]
+
+[travis-image]: https://img.shields.io/travis/eHealthAfrica/angular-eha.login-service.svg
+[travis-url]: https://travis-ci.org/eHealthAfrica/angular-eha.login-service
 
 ## Usage
 
