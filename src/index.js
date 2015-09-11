@@ -1,8 +1,6 @@
 ;(function () {
   'use strict'
 
-  /* globals prompt*/ // nasty
-
   var ngModule = angular.module('eha.login-service', ['pouchdb'])
     .value('localforage', window.localforage)
     .provider('ehaLoginService', function () {
@@ -13,6 +11,7 @@
 
       this.$get = function (
         $q,
+        $window,
         localforage,
         pouchDB
       ) {
@@ -21,8 +20,8 @@
         // notificationService is a promise that must resolve with an array
         // containing the username & password.
         var notificationService = function () {
-          var username = prompt('Username?')
-          var password = prompt('Password?')
+          var username = $window.prompt('Username?')
+          var password = $window.prompt('Password?')
           return $q.when([username, password])
         }
 
