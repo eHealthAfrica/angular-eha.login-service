@@ -20,8 +20,7 @@ module.exports = function (grunt) {
         expand: true,
         cwd: '.tmp',
         src: [
-          'scripts.js',
-          'scripts.template.js'
+          'scripts.js'
         ],
         dest: 'dist/',
         rename: function (dest, src) {
@@ -35,27 +34,7 @@ module.exports = function (grunt) {
           'src/**/*.js',
           '!src/**/*.spec.js'
         ],
-        dest: '.tmp/scripts.js',
-        options: {
-          process: function (src, path) {
-            // Remove templates dependency from non-templates version if exists
-            return src.replace(/,\n {4}'eha.login\.login-service\.template'/, '')
-          }
-        }
-      },
-      scriptsWithTemplateDeps: {
-        src: [
-          'src/**/*.js',
-          '!src/**/*.spec.js'
-        ],
-        dest: '.tmp/scripts.template.deps.js'
-      },
-      template: {
-        src: [
-          '.tmp/template.js',
-          '.tmp/scripts.template.deps.js'
-        ],
-        dest: '.tmp/scripts.template.js'
+        dest: '.tmp/scripts.js'
       }
     },
     ngAnnotate: {
@@ -72,23 +51,7 @@ module.exports = function (grunt) {
     uglify: {
       dist: {
         files: {
-          'dist/login-service.template.min.js': ['.tmp/scripts.template.js'],
           'dist/login-service.min.js': ['.tmp/scripts.js']
-        }
-      }
-    },
-    html2js: {
-      dist: {
-        src: ['src/**/*.tpl.html'],
-        dest: '.tmp/template.js',
-        module: 'eha.login-service.template',
-        options: {
-          rename: function (moduleName) {
-            var parts = moduleName.split('/')
-            var index = parts.indexOf('src')
-            parts = parts.slice(index + 1, parts.length)
-            return 'templates/' + parts.join('/')
-          }
         }
       }
     },
@@ -107,8 +70,7 @@ module.exports = function (grunt) {
     }
   })
 
-  grunt.registerTask('template', ['html2js'])
-  grunt.registerTask('test', ['template', 'karma:unit'])
+  grunt.registerTask('test', ['karma:unit'])
   grunt.registerTask('test:watch', ['karma:watch'])
 
   grunt.registerTask('build', function () {
