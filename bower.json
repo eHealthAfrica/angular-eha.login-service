@@ -1,7 +1,6 @@
 {
   "name": "angular-eha.login-service",
   "description": "Login service to handle auth and auth renewal",
-  "version": "0.0.0",
   "authors": [
     "Remy Sharp <remy@remysharp.com>"
   ],
