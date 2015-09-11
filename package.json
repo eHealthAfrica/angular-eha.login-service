@@ -1,11 +1,11 @@
 {
   "name": "angular-eha.login-service",
-  "version": "0.1.0",
   "description": "Login service to handle auth and auth renewal",
   "main": "dist/login-service.js",
   "scripts": {
     "pretest": "standard",
-    "test": "grunt test"
+    "test": "grunt test",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "author": "Remy Sharp <remy@remysharp.com>",
   "license": "Apache-2.0",
@@ -43,7 +43,8 @@
     "optimist": "^0.6.1",
     "sinon": "^1.12.2",
     "standard": "^5.2.2",
-    "wiredep": "^2.2.2"
+    "wiredep": "^2.2.2",
+    "semantic-release": "^4.3.4"
   },
   "standard": {
     "globals": [
@@ -52,5 +53,9 @@
     "ignore": [
       "dist"
     ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eHealthAfrica/angular-eha.login-service.git"
   }
 }
