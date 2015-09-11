@@ -2,10 +2,10 @@
 
 [![Build Status][travis-image]][travis-url]
 
+> Login service to handle auth and auth renewal
+
 [travis-image]: https://img.shields.io/travis/eHealthAfrica/angular-eha.login-service.svg
 [travis-url]: https://travis-ci.org/eHealthAfrica/angular-eha.login-service
-
-## Usage
 
 ## Installation
 
@@ -13,170 +13,77 @@ Install with npm:
 
     npm install --save angular-eha.login-service
 
-Or alternatively bower:
+Or alternatively, Bower:
 
     bower install --save angular-eha.login-service
 
-### Distribution bundle
+## Usage
 
-- *dist/login-service.js*
-- *dist/login-service.min.js*
+Pass in a CouchDB database endpoint to authenticate against via
+`ehaLoginServiceProvider.config`:
 
-
-Then simply add `eha.login-service` as dependencies somewhere in your project that makes sense and you're good to go.
-
-#### A note on wiredep
-
-If you're using wiredep `dist/login-service.js` will be injected by default. If you don't want that to happen you'll like want to employ something along the following lines in your `Gruntfile`:
-
-```javascript
-wiredep: {
- ...
-  options: {
-    exclude: [
-      'bower_components/login-service/dist/login-service.js'
-    ]
-  }
-  ...
-}
+```js
+angular.config(function(ehaLoginServiceProvider) {
+  ehaLoginServiceProvider.config('https://couchdb.example.com/mydb')
+})
 ```
 
-Then you're free to include whichever bundle you prefer in what ever manner you prefer.
+## API
 
-### Example
+### `ehaLoginService.config`
 
-```html
-<html ng-app="backButtonExample">
-  <head>
-    <title>Back Button Example</title>
-    <script src="bower_components/angular/angular.js"></script>
-    <script src="bower_components/angular-eha.login-service/dist/login-service.js"></script>
-    <script>
-    angular.module('backButtonExample', [
-      'eha.login-service'
-    ]);
-    </script>
-  </head>
-  <body>
-    <!-- Put an example here! -->
-  </body>
-</html>
-```
+Takes a function that **must** return a promise that **must** resolve with an
+array containing a username and password (in that order).
 
-## Contributing
+This is used to prompt user for their credentials (via [maybeShowLoginUi][]).
+It defaults to `window.prompt`, but see [angular-eha.login-dialog][] as an
+example Bootstrap-based implementation.
 
-### Prerequisites
+[maybeShowLoginUi]: #ehaLoginServicemaybeShowLoginUi
+[angular-eha.login-dialog]: https://github.com/eHealthAfrica/angular-eha.login-dialog
 
-- Firefox (for running test suite)
-- node (0.12.0)
-- bower (1.3.12)
-- grunt-cli (0.1.7)
-- grunt (0.4.5)
+### `ehaLoginService.getUserName`
 
+Returns the locally stored username, or `null`.
 
-### Installation
+### `ehaLoginService.maybeShowLoginUi`
 
-```bash
-# Fork the upstream repo on github and pull down your fork
-git clone git@github.com:yourusername/angular-eha.login-service.git
-# change into project folder
-cd angular-eha.login-service
-# Add the upstream as a remote
-git remote add upstream  git@github.com:eHealthAfrica/angular-eha.login-service.git
-# Install the dev dependencies
-npm install
-```
+If the credentials have already been saved locally, return them. Otherwise,
+prompt the user for them, save them locally and return them.
 
-### Docs
+### `ehaLoginService.hasLocalCreds`
 
-Code should be documented following the guidelines set out by [jsdoc](http://usejsdoc.org/) and [ngdoc](https://github.com/angular/angular.js/wiki/Writing-AngularJS-Documentation). We can then leverage [Dgeni](http://github.com/angular/dgeni) or something simlary to generate documentation in any format we like.
+Returns `true` if both username and password have been saved locally.
 
-### Test Suite
+### `ehaLoginService.login`
 
-The test suite is configured to run in Firefox and is powered by:
+Takes a username and password, logs into CouchDB (via
+[pouchdb-authentication][]) and stores the credentials locally.
 
-- Karma
-- Mocha
-- Chai (as promised)
-- Sinon (chai)
+[pouchdb-authentication]: https://github.com/nolanlawson/pouchdb-authentication
 
-The library is conducive to TDD.  `grunt test:watch` is your friend. As modules (and templates) are exposed on their own namespace you can easily isolate areas of the code base for true unit testing without being forced to pull in the whole library or stub/mock modules irrelevant to the feature(s) you're testing.
+### `ehaLoginService.renew`
 
-#### Running Tests
+If the credentials have already been saved locally, renew the user's CouchDB
+session (by calling [ehaLoginService.login][]).
 
-##### Single run
+[ehaLoginService.login]: #ehaLoginServicelogin
 
-```bash
-grunt test
-```
+### `ehaLoginService.logout`
 
-##### Watch
+Deletes local credentials.
 
-```bash
-grunt test:watch
-```
+### `ehaLoginService.storeCredentials`
 
-### Local Development
+Takes a username and password and saves them locally.
 
-Local development is made easy, simply make use of either `npm link` or `bower link` to link the local component to your client application and then use `grunt watch` to continuously build the project.
+## Contributors
 
-### Transpiling templates (html2js)
+* © 2015 Remy Sharp <remy@remysharp.com> (https://remysharp.com)
+* © 2015 Tom Vincent <tom.vincent@ehealthnigeria.org> (https://tlvince.com)
 
-Transpiling our html templates into js allows us to neatly push them into the `$templateCache`.
-
-To transpile the templates it's another simple grunt command:
-
-```bash
-grunt templates
-```
-
-This will compile the templates to the `dist/` folder. But it's probably best to avoid this all together. Both the `grunt test` and `grunt release` commands take care of all of this for you.
-
-If you need to override the default template, simply replace what's already in the `$templateCache` with what ever you want. One way to achieve this is like this:
-
-```html
-<script id="templates/back-button.directive.tpl.html" type="text/html">
-    <button>I'm a button!</button>
-</script>
-```
-
-## Release Process
-
-To make a release, ensure you have issued `grunt build`, committed the distribution package and tagged the commit with an appropriate version according to the [SemVer spec](http://semver.org/).
-
-To make this easy for you, there's a handy grunt task. Simply issue `grunt release:major|minor|patch` and grunt will take care of building, committing and tagging for you. Then make a PR to the master branch of the upstream, merge upon CI build success and then all that's left to do is to push the tags to the upstream.
-
-e.g:
-
-```bash
-  grunt release:minor
-  git pull-request -b <upstream_repo>:master
-  git push upstream --tags
-```
-
-### Publishing to npm
-
-To publish a new version to npm, simply issue from the command line prior making a release (i.e.issuing a `grunt release` and pushing both commits and tags to the upstream):
-
-```
-npm publish
-```
-
-### Publishing to bower
-
-Publishing to bower is slightly simpler in so far that you only have to do it once, and not explicitly for every release like npm:
-
-e.g.
-
-```
-bower register angular-eha.login-service <upstream_repo_url>
-```
 ## License
 
-Copyright 2015 Remy Sharp <remy@remysharp.com>
+Released under the [Apache 2.0 License][license].
 
-Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.  You may obtain a copy of the License at
-
-http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the License for the specific language governing permissions and limitations under the License.
+[license]: http://www.apache.org/licenses/LICENSE-2.0.html
