@@ -1,7 +1,6 @@
 // Karma configuration
 // Generated on Thu Feb 19 2015 11:25:37 GMT+0100 (CET)
 var bowerJS = require('wiredep')({
-  exclude: [/jasmine$/],
   devDependencies: true
 }).js
 
@@ -12,12 +11,13 @@ module.exports = function (config) {
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['mocha', 'chai', 'sinon-chai', 'chai-as-promised'],
+    frameworks: [
+      'mocha',
+      'sinon-chai'
+    ],
 
     // list of files / patterns to load in the browser
     files: bowerJS.concat([
-      'node_modules/angular/angular.js',
-      'node_modules/angular-mocks/angular-mocks.js',
       'src/**/*.js',
       'tests/**/*.spec.js'
     ]),
