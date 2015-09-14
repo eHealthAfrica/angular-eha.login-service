@@ -43,7 +43,6 @@ It defaults to `window.prompt`, but see [angular-eha.login-dialog][] as an
 example Bootstrap-based implementation.
 
 [maybeShowLoginUi]: #ehaLoginServicemaybeShowLoginUi
-[angular-eha.login-dialog]: https://github.com/eHealthAfrica/angular-eha.login-dialog
 
 ### `ehaLoginService.getUserName`
 
@@ -79,6 +78,16 @@ Deletes local credentials.
 ### `ehaLoginService.storeCredentials`
 
 Takes a username and password and saves them locally.
+
+## See also
+
+* [angular-eha.retriable][]: wrapper logic to attempt to re-establish login
+  session before running workflow
+
+* [angular-eha.login-dialog][]: a login dialog box UI for angular-eha.login-service
+
+[angular-eha.retriable]: https://github.com/eHealthAfrica/angular-eha.retriable
+[angular-eha.login-dialog]: https://github.com/eHealthAfrica/angular-eha.login-dialog
 
 ## Contributors
 
