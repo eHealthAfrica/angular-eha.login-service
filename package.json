@@ -4,6 +4,7 @@
   "main": "dist/login-service.js",
   "scripts": {
     "build": "grunt build",
+    "postinstall": "bower install",
     "pretest": "standard",
     "test": "grunt test",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
@@ -16,6 +17,7 @@
   "keywords": "eha",
   "homepage": "https://github.com/eHealthAfrica",
   "devDependencies": {
+    "bower": "^1.5.2",
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
