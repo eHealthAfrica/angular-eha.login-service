@@ -99,7 +99,7 @@
 
     // I don't quite understand why this works, but I need it to do config
     // magic.
-    module('eha.login-service', 'eha.login-service.test')
+    module('eha.login-service.service', 'eha.login-service.test')
 
     inject(function (_$q_, _ehaLoginService_, _$rootScope_) {
       $q = _$q_
