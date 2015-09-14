@@ -1,6 +1,6 @@
 {
   "name": "angular-eha.login-service",
-  "description": "Login service to handle auth and auth renewal",
+  "description": "Login service to handle CouchDB authentication",
   "authors": [
     "Remy Sharp <remy@remysharp.com> (https://remysharp.com)",
     "Tom Vincent <tom.vincent@ehealthnigeria.org> (https://tlvince.com)"

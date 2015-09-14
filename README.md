@@ -2,7 +2,10 @@
 
 [![Build Status][travis-image]][travis-url]
 
-> Login service to handle auth and auth renewal
+> Login service to handle CouchDB auth and auth renewal
+
+Provides an convenience API for handling authentication with CouchDB in
+AngularJS applications.
 
 [travis-image]: https://img.shields.io/travis/eHealthAfrica/angular-eha.login-service.svg
 [travis-url]: https://travis-ci.org/eHealthAfrica/angular-eha.login-service
