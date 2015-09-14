@@ -83,7 +83,6 @@ Takes a username and password and saves them locally.
 
 * [angular-eha.retriable][]: wrapper logic to attempt to re-establish login
   session before running workflow
-
 * [angular-eha.login-dialog][]: a login dialog box UI for angular-eha.login-service
 
 [angular-eha.retriable]: https://github.com/eHealthAfrica/angular-eha.retriable
