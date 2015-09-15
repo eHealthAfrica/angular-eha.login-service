@@ -304,4 +304,22 @@
       }).toThrowError()
     })
   })
+
+  describe('config', function () {
+    var loginService
+
+    beforeEach(function () {
+      var $injector = angular.injector([
+        'ng',
+        'eha.login-service.service'
+      ])
+      loginService = $injector.get('ehaLoginService')
+    })
+
+    it('should throw if config is not a function', function () {
+      expect(function () {
+        loginService.config('nofun')
+      }).toThrowError()
+    })
+  })
 })(this)
