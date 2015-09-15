@@ -286,4 +286,22 @@
         .finally(done)
     })
   })
+
+  describe('login', function () {
+    var loginService
+
+    beforeEach(function () {
+      var $injector = angular.injector([
+        'ng',
+        'eha.login-service.service'
+      ])
+      loginService = $injector.get('ehaLoginService')
+    })
+
+    it('should throw if the CouchDB endpoint is unset', function () {
+      expect(function () {
+        loginService.login()
+      }).toThrowError()
+    })
+  })
 })(this)
