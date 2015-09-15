@@ -12,8 +12,7 @@ module.exports = function (config) {
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: [
-      'mocha',
-      'sinon-chai'
+      'jasmine'
     ],
 
     // list of files / patterns to load in the browser
@@ -61,7 +60,9 @@ module.exports = function (config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Firefox'],
+    browsers: [
+      'PhantomJS'
+    ],
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits

@@ -1,8 +1,10 @@
 ;(function () {
   'use strict'
 
-  var ngModule = angular.module('eha.login-service.service', ['pouchdb'])
-    .value('localforage', window.localforage)
+  var ngModule = angular.module('eha.login-service.service', [
+    'pouchdb',
+    'eha.login-service-adaptor.service'
+  ])
     .provider('ehaLoginService', function () {
       var DB_NAME = null
       this.config = function (database) {
@@ -12,8 +14,8 @@
       this.$get = function (
         $q,
         $window,
-        localforage,
-        pouchDB
+        pouchDB,
+        ehaLoginServiceAdaptor
       ) {
         var loginService = this
 
@@ -44,28 +46,9 @@
           return _db
         }
 
-        function localforgeWrap (method) {
-          return function () {
-            var deferred = $q.defer()
-            var args = [].slice.call(arguments, 0)
-
-            args.push(function (error, value) {
-              if (error) {
-                deferred.reject(error)
-              } else {
-                deferred.resolve(value)
-              }
-            })
-
-            localforage[method].apply(localforage, args)
-
-            return deferred.promise
-          }
-        }
-
-        var setItem = localforgeWrap('setItem')
-        var getItem = localforgeWrap('getItem')
-        var removeItem = localforgeWrap('removeItem')
+        var setItem = ehaLoginServiceAdaptor.setItem
+        var getItem = ehaLoginServiceAdaptor.getItem
+        var removeItem = ehaLoginServiceAdaptor.removeItem
 
         var storeCredentials = function (username, password) {
           var promises = [

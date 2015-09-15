@@ -1,216 +1,256 @@
-;(function () {
-  /*global localforage expect it inject describe beforeEach sinon */
+;(function (env) {
+  /* global expect it describe beforeEach afterEach spyOn */
   'use strict'
 
-  function digest () {
-    inject(function ($rootScope) {
-      $rootScope.$digest()
-    })
-  }
-
-  function digestIt (original) {
-    return function (description, testFn) {
-      var isAsync = testFn.length >= 1
-      var fn = !isAsync ? testFn : function (done) {
-        testFn(done)
-        digest()
-      }
-      original(description, fn)
-    }
-  }
-
-  // test helper/override thing
-  it = digestIt(it) // eslint-disable-line
-
-  // Angular modules needed
-  var loginService
-  var $q
-  var $rootScope // eslint-disable-line
-  // Fake local store
-  // var localforage
-  // Fake local pouch
-  var pouchSpy
-  var localFake = {}
-  var ehaLoginServiceProvider
-
-  beforeEach(module(function ($provide) {
-    // Fake out the little pouch we use in login service
-    pouchSpy = sinon.spy(function (user, pass) {
-      if (user && pass) {
-        return $q.when({'ok': true, 'name': user, 'roles': []})
-      }
-      return $q.reject({status: 401, message: 'Name or password invalid'})
-    })
-
-    angular.module('pouchdb', function () {})
-    $provide.value('pouchDB', sinon.spy(function () {
-      return {
-        login: pouchSpy
-      }
-    }))
-  }))
-
-  beforeEach(function (done) {
-    try {
-      localforage.setItem.restore()
-      localforage.getItem.restore()
-      localforage.removeItem.restore()
-    } catch (e) {
-      // it didn't run yet.
-    }
-
-    localFake = {}
-    sinon.stub(localforage, 'setItem', function (key, value, callback) {
-      localFake[key] = value
-
-      if (callback) {
-        callback(null)
-      }
-
-      return Promise.resolve()
-    })
-
-    sinon.stub(localforage, 'getItem', function (key, callback) {
-      if (callback) {
-        callback(null, localFake[key])
-      }
-      return Promise.resolve(localFake[key])
-    })
-
-    sinon.stub(localforage, 'removeItem', function (key, callback) {
-      delete localFake[key]
-      if (callback) {
-        callback(null)
-      }
-      return Promise.resolve()
-    })
-
-    // finally, reset the localforge
-    localforage.clear(function () {
-      done()
-    })
+  afterEach(function (done) {
+    var $injector = angular.injector([
+      'ng',
+      'eha.login-service.service'
+    ])
+    var adaptor = $injector.get('ehaLoginServiceAdaptor')
+    adaptor.removeItem('username')
+      .then(adaptor.removeItem.bind(null, 'password'))
+      .catch(env.fail.bind())
+      .finally(done)
   })
 
-  beforeEach(function () {
-    angular.module('eha.login-service.test', function () {}).config(function (_ehaLoginServiceProvider_) {
-      ehaLoginServiceProvider = _ehaLoginServiceProvider_
-      _ehaLoginServiceProvider_.config('my_db_url')
+  describe('storeCredentials', function () {
+    var adaptor
+    var loginService
+
+    beforeEach(function () {
+      angular.module('mock', [])
+        .service('ehaLoginServiceAdaptor', function () {
+          this.setItem = angular.noop
+          this.getItem = angular.noop
+          this.removeItem = angular.noop
+          spyOn(this, 'setItem')
+        })
+      var $injector = angular.injector([
+        'ng',
+        'eha.login-service.service',
+        'mock'
+      ])
+      loginService = $injector.get('ehaLoginService')
+      adaptor = $injector.get('ehaLoginServiceAdaptor')
     })
 
-    // I don't quite understand why this works, but I need it to do config
-    // magic.
-    module('eha.login-service.service', 'eha.login-service.test')
-
-    inject(function (_$q_, _ehaLoginService_, _$rootScope_) {
-      $q = _$q_
-      loginService = _ehaLoginService_
-      $rootScope = _$rootScope_
-    })
-  })
-
-  describe('Service: loginService', function () {
     it('should store credentials', function (done) {
       loginService.storeCredentials('karl', 'pineapple')
         .then(function () {
-          expect(localforage.setItem.calledOnce)
-          expect(localforage.setItem.withArgs('username', 'karl').calledOnce)
-          expect(localforage.setItem.withArgs('password', 'pineapple').calledOnce)
-          done()
+          expect(adaptor.setItem).toHaveBeenCalledWith('username', 'karl')
+          expect(adaptor.setItem).toHaveBeenCalledWith('password', 'pineapple')
         })
+        .catch(env.fail.bind())
+        .finally(done)
+    })
+  })
+
+  describe('hasLocalCreds', function () {
+    var adaptor
+    var loginService
+
+    beforeEach(function () {
+      var $injector = angular.injector([
+        'ng',
+        'eha.login-service.service'
+      ])
+      loginService = $injector.get('ehaLoginService')
+      adaptor = $injector.get('ehaLoginServiceAdaptor')
     })
 
-    it('should report valid creds only if both username and pass is there', function (done) {
-      // default: has nothing
-      new Promise(function (resolve) {
-        loginService.hasLocalCreds().then(function (hasCreds) {
-          expect(hasCreds).to.equal(false)
-          resolve()
+    it('should default to false', function (done) {
+      loginService.hasLocalCreds()
+        .then(function (hasCreds) {
+          expect(hasCreds).toBe(false)
         })
-      }).then(function () {
-        return localforage.setItem('username', 'myuser', function () {
-          loginService.hasLocalCreds().then(function (hasCreds) {
-            expect(hasCreds).to.equal(false)
-          })
-          digest()
+        .catch(env.fail.bind())
+        .finally(done)
+    })
+
+    it('should be false if only the username is set', function (done) {
+      adaptor.setItem('username', 'myuser')
+        .then(loginService.hasLocalCreds)
+        .then(function (hasCreds) {
+          expect(hasCreds).toBe(false)
         })
-      }).then(function () {
-        return Promise.all([
-          localforage.setItem('username', 'myuser'),
-          localforage.setItem('password', 'mypass')
-        ]).then(function () {
-          loginService.hasLocalCreds().then(function (hasCreds) {
-            expect(hasCreds).to.equal(true)
-            done()
-          })
-          digest()
+        .catch(env.fail.bind())
+        .finally(done)
+    })
+
+    it('should be true if username and password are set', function (done) {
+      adaptor.setItem('username', 'myuser')
+        .then(adaptor.setItem.bind(null, 'password', 'mypass'))
+        .then(loginService.hasLocalCreds)
+        .then(function (hasCreds) {
+          expect(hasCreds).toBe(true)
         })
-      }).catch(function (error) {
-        console.log(error.message)
-        done(error)
+        .catch(env.fail.bind())
+        .finally(done)
+    })
+  })
+
+  describe('logout', function () {
+    var $q
+    var store = {}
+    var adaptor
+    var loginService
+
+    beforeEach(function () {
+      angular.module('eha.login-service-adaptor.mock', [])
+        .service('ehaLoginServiceAdaptor', function () {
+          this.setItem = function (key, value) {
+            store[key] = value
+          }
+          this.removeItem = function (key) {
+            delete store[key]
+          }
+          this.getItem = angular.noop
+        })
+
+      var $injector = angular.injector([
+        'ng',
+        'eha.login-service.service',
+        'eha.login-service-adaptor.mock'
+      ])
+      $q = $injector.get('$q')
+      loginService = $injector.get('ehaLoginService')
+      adaptor = $injector.get('ehaLoginServiceAdaptor')
+    })
+
+    it('should delete all creds', function (done) {
+      $q.all([
+        adaptor.setItem('username', 'nicklas'),
+        adaptor.setItem('password', 'backstrom')
+      ])
+      .then(loginService.logout.bind())
+      .then(function () {
+        expect(store.username).toBeUndefined()
+        expect(store.password).toBeUndefined()
       })
+      .catch(env.fail.bind())
+      .finally(done)
     })
+  })
 
-    it('should delete creds when logging out', function (done) {
-      Promise.all([
-        localforage.setItem('username', 'nicklas'),
-        localforage.setItem('password', 'backstrom')
-      ]).then(function () {
-        loginService.logout().then(function () {
-          expect(localFake.username).to.be.undefined
-          expect(localFake.password).to.be.undefined
-          expect(localforage.removeItem.called)
+  describe('renew', function () {
+    var $q
+    var adaptor
+    var loginService
+    var store
+    var pouchDB
+
+    beforeEach(function () {
+      angular.module('eha.login-service-adaptor.mock', [])
+        .service('ehaLoginServiceAdaptor', function () {
+          store = {}
+          this.setItem = function (key, value) {
+            store[key] = value
+          }
+          this.removeItem = function (key) {
+            delete store[key]
+          }
+          this.getItem = function (key) {
+            return store[key]
+          }
         })
-        digest()
-      }).then(done).catch(done)
+
+      angular.module('pouchdb.mock', [])
+        .service('loginMock', function ($q) {
+          this.login = function (user, pass) {
+            if (user && pass) {
+              return $q.when({
+                ok: true,
+                name: user,
+                roles: []
+              })
+            }
+            return $q.reject({
+              status: 401,
+              message: 'Name or password invalid'
+            })
+          }
+          spyOn(this, 'login').and.callThrough()
+        })
+        .factory('pouchDB', function (loginMock) {
+          return function () {
+            return loginMock
+          }
+        })
+
+      angular.module('testApp', [])
+        .config(function (ehaLoginServiceProvider) {
+          ehaLoginServiceProvider.config('https://mydb')
+        })
+
+      var $injector = angular.injector([
+        'ng',
+        'eha.login-service.service',
+        'eha.login-service-adaptor.mock',
+        'pouchdb.mock',
+        'testApp'
+      ])
+      loginService = $injector.get('ehaLoginService')
+      adaptor = $injector.get('ehaLoginServiceAdaptor')
+      $q = $injector.get('$q')
+      pouchDB = $injector.get('loginMock').login
     })
 
     it('should renew the session if it has creds', function (done) {
-      localFake.username = 'santa'
-      localFake.password = 'claus'
-
-      loginService.renew().then(function () {
-        expect(pouchSpy.called)
-        expect(pouchSpy).to.have.been.calledWith('santa', 'claus')
-        expect(localFake.username).to.equal('santa')
-        expect(localFake.password).to.equal('claus')
-        done()
+      $q.all([
+        adaptor.setItem('username', 'santa'),
+        adaptor.setItem('password', 'claus')
+      ])
+      .then(loginService.renew.bind())
+      .then(function () {
+        expect(pouchDB, 'login').toHaveBeenCalledWith('santa', 'claus')
+        expect(store.username).toBe('santa')
+        expect(store.password).toBe('claus')
       })
+      .catch(env.fail.bind())
+      .finally(done)
     })
 
-    it('should not renew session if it doesn’t have creds', function (done) {
-      localFake.username = 'santa'
-      localFake.password = undefined // bam bam bAAAAAAM
-
-      loginService.renew().catch(function (err) {
-        expect(pouchSpy.callCount === 0)
-
-        // Make it return 401 right now, works with the retrial lopp
-        expect(err.status).to.equal(401)
-        done()
-      })
-    })
-
-    it('should prompt user for creds if it doesn’t have any', function (done) {
-      ehaLoginServiceProvider.config(function () {
-        var defer = $q.defer()
-
-        setTimeout(function () {
-          defer.resolve(['remy', 'password'])
-          digest()
-        }, 100)
-
-        return defer.promise
-      })
-
-      inject(function (ehaLoginService) {
-        ehaLoginService.maybeShowLoginUi().then(function (creds) {
-          expect(creds).deep.equal(['remy', 'password'])
-          ehaLoginService.maybeShowLoginUi().then(function (creds) {
-            expect(creds).deep.equal(['remy', 'password'])
-            done()
-          })
+    it('should not renew if it doesnt have creds', function (done) {
+      store.username = 'santa'
+      store.password = undefined // bam bam bAAAAAAM
+      loginService.renew()
+        .then(env.fail.bind())
+        .catch(function (err) {
+          expect(pouchDB, 'this').not.toHaveBeenCalled()
+          expect(err.status).toBe(401)
         })
-      })
+        .finally(done)
     })
   })
-})()
+
+  describe('maybeShowLoginUi', function () {
+    var loginService
+
+    beforeEach(function () {
+      angular.module('testApp', [])
+        .run(function (ehaLoginService, $q) {
+          ehaLoginService.config(function () {
+            return $q.when(['remy', 'password'])
+          })
+        })
+
+      var $injector = angular.injector([
+        'ng',
+        'eha.login-service.service',
+        'testApp'
+      ])
+
+      loginService = $injector.get('ehaLoginService')
+    })
+
+    it('should prompt for creds if it doesnt have any', function (done) {
+      loginService.maybeShowLoginUi()
+        .then(function (creds) {
+          expect(creds).toEqual(['remy', 'password'])
+        })
+        .catch(env.fail.bind())
+        .finally(done)
+    })
+  })
+})(this)
