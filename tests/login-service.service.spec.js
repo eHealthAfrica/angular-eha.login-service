@@ -253,4 +253,37 @@
         .finally(done)
     })
   })
+
+  describe('getUserName', function () {
+    var adaptor
+    var loginService
+
+    beforeEach(function () {
+      var $injector = angular.injector([
+        'ng',
+        'eha.login-service.service'
+      ])
+      loginService = $injector.get('ehaLoginService')
+      adaptor = $injector.get('ehaLoginServiceAdaptor')
+    })
+
+    it('should return falsy if username unset', function (done) {
+      loginService.getUserName()
+        .then(function (userName) {
+          expect(userName).toBeFalsy
+        })
+        .catch(env.fail.bind())
+        .finally(done)
+    })
+
+    it('should return the username if set', function (done) {
+      adaptor.setItem('username', 'rick')
+        .then(loginService.getUserName.bind())
+        .then(function (userName) {
+          expect(userName).toBe('rick')
+        })
+        .catch(env.fail.bind())
+        .finally(done)
+    })
+  })
 })(this)
