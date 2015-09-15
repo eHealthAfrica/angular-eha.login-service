@@ -38,8 +38,15 @@
         var _db // cached db connection
         var db = function () {
           if (!DB_NAME) {
-            throw new Error('loginService must be configured with ' +
-              ' .config({ database: "<url/db_name to couchdb>"')
+            var lines = [
+              'loginService must be configured with:\n',
+              '.config(function (ehaLoginServiceProvider) {',
+              '  // Full URL to a CouchDB, including an existing DB',
+              '  var url = "https://couchdb.example.com/db"',
+              '  ehaLoginServiceProvider.config(url)',
+              '})'
+            ].join('\n')
+            throw new Error(lines)
           }
 
           _db = _db || pouchDB(DB_NAME)
