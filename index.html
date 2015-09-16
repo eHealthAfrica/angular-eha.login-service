@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html ng-app="app">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>angular-eha.login-service</title>
+  </head>
+  <body>
+    <div ng-controller="AppCtrl as ctrl">
+      <p ng-if="ctrl.loggedIn">Logged in</p>
+      <p>Username: <code>test</code></p>
+      <p>Password: <code>test</code></p>
+      <button ng-click="ctrl.login()">Login</button>
+      <button ng-click="ctrl.logout()">Logout</button>
+    </div>
+    <script src="//cdn.jsdelivr.net/angularjs/1.3.14/angular.min.js"></script>
+    <script src="//cdn.jsdelivr.net/pouchdb/4.0.3/pouchdb.min.js"></script>
+    <script src="//cdn.jsdelivr.net/angular.pouchdb/3.0.0/angular-pouchdb.min.js"></script>
+    <script src="//cdn.rawgit.com/nolanlawson/pouchdb-authentication/master/dist/pouchdb.authentication.min.js"></script>
+    <script src="//cdn.rawgit.com/nolanlawson/pouchdb-upsert/master/dist/pouchdb.upsert.min.js"></script>
+    <script src="//rawgit.com/eHealthAfrica/angular-eha.login-service/master/dist/login-service.js"></script>
+    <script>
+      angular.module('app', [
+        'eha.login-service'
+      ])
+        .config(function(ehaLoginServiceProvider) {
+          ehaLoginServiceProvider.config('https://ehaloginservice.iriscouch.com/letsgo')
+        })
+        .controller('AppCtrl', function(ehaLoginService) {
+          var self = this
+          this.login = function() {
+            ehaLoginService.maybeShowLoginUi()
+              .then(function(creds) {
+                ehaLoginService.login.apply(null, creds)
+              })
+              .then(function() {
+                self.loggedIn = true
+              })
+          }
+          this.logout = function() {
+            ehaLoginService.logout()
+              .then(function() {
+                self.loggedIn = false
+              })
+          }
+        })
+    </script>
+  </body>
+</html>
