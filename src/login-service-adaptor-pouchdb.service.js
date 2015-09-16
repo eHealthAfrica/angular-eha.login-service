@@ -16,6 +16,9 @@
         return doc
       }
       return db.upsert(id, diffFun)
+        .then(function (res) {
+          return value
+        })
     }
 
     this.getItem = function (key) {
