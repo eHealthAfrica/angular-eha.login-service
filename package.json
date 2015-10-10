@@ -4,12 +4,12 @@
   "main": "dist/login-service.js",
   "scripts": {
     "build": "grunt build",
-    "predeploy": "npm run build",
-    "deploy": "./scripts/deploy.sh",
     "postinstall": "bower install",
+    "prepublish-dist": "npm run build",
+    "publish-dist": "publish-dist --author-name 'eHealth Africa CI' --author-email 'devops+github+ehealthafrica-ci@ehealthafrica.org'",
     "pretest": "standard",
     "test": "grunt test",
-    "semantic-release": "semantic-release pre && npm run deploy && npm publish && semantic-release post"
+    "semantic-release": "semantic-release pre && npm run publish-dist && npm publish && semantic-release post"
   },
   "contributors": [
     "Remy Sharp <remy@remysharp.com> (https://remysharp.com)",
@@ -35,6 +35,7 @@
     "karma-jasmine": "^0.3.6",
     "karma-phantomjs-launcher": "^0.1.4",
     "load-grunt-tasks": "^3.1.0",
+    "publish-dist": "^1.0.8",
     "semantic-release": "^4.3.4",
     "standard": "^5.2.2",
     "wiredep": "^2.2.2"
