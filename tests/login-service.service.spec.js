@@ -113,7 +113,7 @@
         .service('logoutMock', function ($q) {
           this.logout = function () {
             return $q.when({
-              ok: true,
+              ok: true
             })
           }
           spyOn(this, 'logout').and.callThrough()
