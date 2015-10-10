@@ -95,6 +95,7 @@
     var store = {}
     var adaptor
     var loginService
+    var pouchDB
 
     beforeEach(function () {
       angular.module('eha.login-service-adaptor.mock', [])
@@ -108,14 +109,37 @@
           this.getItem = angular.noop
         })
 
+      angular.module('pouchdb.mock', [])
+        .service('logoutMock', function ($q) {
+          this.logout = function () {
+            return $q.when({
+              ok: true,
+            })
+          }
+          spyOn(this, 'logout').and.callThrough()
+        })
+        .factory('pouchDB', function (logoutMock) {
+          return function () {
+            return logoutMock
+          }
+        })
+
+      angular.module('testApp', [])
+        .config(function (ehaLoginServiceProvider) {
+          ehaLoginServiceProvider.config('https://mydb')
+        })
+
       var $injector = angular.injector([
         'ng',
         'eha.login-service.service',
-        'eha.login-service-adaptor.mock'
+        'eha.login-service-adaptor.mock',
+        'pouchdb.mock',
+        'testApp'
       ])
       $q = $injector.get('$q')
       loginService = $injector.get('ehaLoginService')
       adaptor = $injector.get('ehaLoginServiceAdaptor')
+      pouchDB = $injector.get('logoutMock').logout
     })
 
     it('should delete all creds', function (done) {
@@ -125,6 +149,7 @@
       ])
       .then(loginService.logout.bind())
       .then(function () {
+        expect(pouchDB, 'logout').toHaveBeenCalled()
         expect(store.username).toBeUndefined()
         expect(store.password).toBeUndefined()
       })
