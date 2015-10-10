@@ -231,10 +231,12 @@
 
         // FIXME this could mess things up https://github.com/eHealthAfrica/BiometricRegistration/blob/f1492732380322aca7415defd7dcb222034750f2/app/scripts/services/logout.js#L5
         loginService.logout = function () {
-          return $q.all([
+          var promises = [
             removeItem('username'),
             removeItem('password')
-          ])
+          ]
+          return db().logout()
+            .then($q.all.bind($q, promises))
         }
 
         loginService.storeCredentials = function (username, password) {
